@@ -72,7 +72,7 @@ void SSD1306::init(void) {
   _sendCmd(0x80);                                  // the suggested ratio 0x80
 
   _sendCmd(SSD1306_SETMULTIPLEX);                  // 0xA8
-  _sendCmd(0x3F);
+  _sendCmd(63);                                    // default on-reset value
 
   _sendCmd(SSD1306_SETDISPLAYOFFSET);              // 0xD3
   _sendCmd(0x0);                                   // no offset
@@ -96,10 +96,10 @@ void SSD1306::init(void) {
   _sendCmd(0x12);
 
   _sendCmd(SSD1306_SETCONTRAST);                   // 0x81
-  _sendCmd(0xCF);
+  _sendCmd(128);
 
   _sendCmd(SSD1306_SETPRECHARGE);                  // 0xd9
-  _sendCmd(0xF1);
+  _sendCmd(0x44);
 
   _sendCmd(SSD1306_SETVCOMDETECT);                 // 0xDB
   _sendCmd(0x40);
