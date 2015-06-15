@@ -170,6 +170,10 @@ int8_t SSD1306::setBufferRegion(uint16_t x0, uint16_t y0, uint16_t width, uint16
   _buffer_size[1] = height;
 
   memset(_buffer, 0, SSD1306_BUF_SIZE);
+  // this means we always upload a single byte even if there were no
+  // modifications
+  _buffer_modified_index[0] = 0;
+  _buffer_modified_index[1] = 0;
 }
 
 void SSD1306::uploadBuffer() {
@@ -182,7 +186,7 @@ void SSD1306::uploadBuffer() {
   _sendCmd(_buffer_origin[1]/8+_buffer_size[1]/8-1);
 
   _sendData(
-      _buffer+_buffer_modified_index[0], 
+      _buffer+_buffer_modified_index[0],
       _buffer_modified_index[1] - _buffer_modified_index[0] + 1);
 
 
