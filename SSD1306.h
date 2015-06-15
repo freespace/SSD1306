@@ -143,13 +143,37 @@ enum Color{
 enum {
   SSD1306_ERROR_NOT_MULTIPLE_OF_8 = 1,
   SSD1306_ERROR_REGION_TOOLARGE,
+  SSD1306_ERROR_UNKNOWN_REGION,
 };
+
+typedef enum {
+  // allocates the buffer with its origin at (0,0) with same width as the
+  // screen and as high as buffer size allows.
+  SSD1306_REGION_TOP,
+
+  // allocates the buffer such that the centre of the buffer is at screen
+  // centre, as wide as the screen, and as high as buffer size allows.
+  SSD1306_REGION_MID,
+
+  // allocates the buffer so its bottom-right corner is also the bottom-right
+  // corner of the screen, as wide as the screen, and as high as buffer size
+  // allows.
+  SSD1306_REGION_BOT,
+} SSD1306ScreenRegion;
 
 class SSD1306 : public virtual SGL {
 public:
     SSD1306(uint8_t i2c_address);
     void init(void);
     void drawPixel(uint16_t x, uint16_t y, uint16_t color);
+
+    /**
+     * Buffered drawString method. This method DOES NOT automatically call
+     * uploadBuffer. Suitable for drawing a lot of text at once and then
+     * uploading in bulk manually.
+     */ 
+    void b_drawString(char *string, uint16_t x, uint16_t y, uint16_t size, uint16_t color);
+    void drawString(char *string, uint16_t x, uint16_t y, uint16_t size, uint16_t color);
     void clearWindow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
 
     /**
@@ -168,10 +192,21 @@ public:
     int8_t setBufferRegion(uint16_t x0, uint16_t y0, uint16_t width, uint16_t height);
 
     /**
+     * Convenient way to set the buffer region to predefined values
+     */
+    int8_t setBufferRegion(SSD1306ScreenRegion region);
+
+    /**
      * Uploads the buffer to the region previously specified by
-     * setBufferRegion
+     * setBufferRegion. This is somewhat optimised such that only
+     * the buffer bounded by modified elements is uploaded.
      */
     void uploadBuffer();
+
+    /**
+     * Like uploadBuffer, but uploads everything.
+     */
+    void uploadBufferAll();
 
     /**
      * Resets the buffer to 0
@@ -202,6 +237,12 @@ private:
      * Stores width, height
      */
     uint8_t _buffer_size[2];
+
+    /**
+     * Stores the largest and smallest buffer index accessed since the last
+     * uploadBuffer call
+     */
+    uint16_t _buffer_modified_index[2];
 };
 
 #endif
